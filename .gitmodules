@@ -1,0 +1,3 @@
+[submodule "include/arm-encoder-driver"]
+	path = include/arm-encoder-driver
+	url = https://github.com/UMRoboticsTeam/arm-encoder-driver
