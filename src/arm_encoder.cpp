@@ -1,6 +1,6 @@
-#include "./arm_encoder.h"
+#include "../include/umrt_arm_encoder_ros/arm_encoder.h"
 
-namespace log = boost::log; 
+namespace boost_log = boost::log; 
 namespace sources = boost::log::sources; 
 namespace expr = boost::log::expressions; 
 namespace sinks = boost::log::sinks; 
@@ -29,18 +29,18 @@ void ArmEncoder::EncoderDiagnosticsBuffer::publisher_callback(){
     m_diagnostics_publisher->publish(msg); 
 }; 
 
-ArmEncoder::Ros2ostream::Ros2ostream(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr diagnostics_publisher): buffer(diagnostics_publisher),std::ostream(&buffer){}; 
+ArmEncoder::Ros2ostream::Ros2ostream(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr diagnostics_publisher): std::ostream(&buffer), buffer(diagnostics_publisher){}; 
 
 ArmEncoder::ArmEncoderNode::ArmEncoderNode():Node("arm_encoder_node"){
-    this->angle_publisher = this->create_publisher<sensor_msgs::msg::JointState>("encoder_angle",10); 
-    this->temp_publisher = this->create_publisher<sensor_msgs::msg::Temperature>("encoder_temperature",10); 
-    this->diagnostics_publisher = this->create_publisher<std_msgs::msg::String>("encoder_diagnostics",10); 
+    angle_publisher = this->create_publisher<sensor_msgs::msg::JointState>("encoder_angle",10); 
+    temp_publisher = this->create_publisher<sensor_msgs::msg::Temperature>("encoder_temperature",10); 
+    diagnostics_publisher = this->create_publisher<std_msgs::msg::String>("encoder_diagnostics",10); 
     can_interface = Interface(); 
     can_interface.initialize_channel(); 
     can_interface.begin_read_loop('a'); 
     can_interface.begin_read_loop('t'); 
-    can_interface.angle_signal.connect(&angle_handler); 
-    can_interface.temp_signal.connect(&temperature_handler); 
+    can_interface.angle_signal.connect([&](uint32_t can_id, double angle, double angular_vel, uint16_t n_rotations){angle_handler(can_id,angle,angular_vel,n_rotations);}); 
+    can_interface.temp_signal.connect([&](uint32_t can_id, double temp){temperature_handler(can_id,temp);}); 
 }; 
 
 void ArmEncoder::ArmEncoderNode::temperature_handler(uint32_t can_id, double temp){
@@ -58,7 +58,7 @@ void ArmEncoder::ArmEncoderNode::angle_handler(uint32_t can_id,double angle, dou
 }; 
 
 void ArmEncoder::ArmEncoderNode::setup_logging(){
-    boost::shared_ptr<log::core> core = log::core::get(); 
+    boost::shared_ptr<boost_log::core> core = boost_log::core::get(); 
     auto backend = boost::make_shared<sinks::text_ostream_backend>(); 
     auto ros_stream = boost::make_shared<Ros2ostream>(this->diagnostics_publisher); 
     backend->add_stream(ros_stream); 

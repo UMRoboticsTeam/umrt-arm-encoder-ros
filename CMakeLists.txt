@@ -1,18 +1,35 @@
 cmake_minimum_required(VERSION 3.8)
 project(umrt_arm_encoder_ros)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
+add_subdirectory(include/arm-encoder-driver/cpp)
+add_executable(${PROJECT_NAME} src/arm_encoder.cpp)
+ament_target_dependencies(${PROJECT_NAME} rclcpp std_msgs sensor_msgs)
+
+find_package(Boost REQUIRED COMPONENTS log log_setup thread system filesystem)
+target_link_libraries(${PROJECT_NAME}  Boost::log Boost::log_setup Boost::thread Boost::system Boost::filesystem pthread)
+target_link_directories(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
+
+target_link_libraries(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}includes/arm-encoder-driver/cpp/)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}includes/arm-encoder-driver/cpp/)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/arm-encoder-driver/cpp/src)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
+
   # the following line skips the linter which checks for copyrights
   # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
@@ -23,4 +40,8 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
+install(DIRECTORY include/ DESTINATION include)
+
 ament_package()
+
