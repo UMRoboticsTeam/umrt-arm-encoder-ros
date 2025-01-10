@@ -36,6 +36,7 @@ ArmEncoder::ArmEncoderNode::ArmEncoderNode():Node("arm_encoder_node"){
     temp_publisher = this->create_publisher<sensor_msgs::msg::Temperature>("encoder_temperature",10); 
     diagnostics_publisher = this->create_publisher<std_msgs::msg::String>("encoder_diagnostics",10); 
     can_interface = Interface(); 
+    setup_logging(); 
     can_interface.initialize_channel(); 
     can_interface.begin_read_loop('a'); 
     can_interface.begin_read_loop('t'); 
