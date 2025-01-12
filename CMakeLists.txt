@@ -23,7 +23,7 @@ target_link_libraries(${PROJECT_NAME}  Boost::log Boost::log_setup Boost::thread
 target_link_directories(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} ${CMAKE_INSTALL_PREFIX}/lib/libcpp_arm_encoder_driver.so)
+target_link_libraries(${PROJECT_NAME} cpp_arm_encoder_driver)
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}includes/arm-encoder-driver/cpp/)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/arm-encoder-driver/cpp/src)
 

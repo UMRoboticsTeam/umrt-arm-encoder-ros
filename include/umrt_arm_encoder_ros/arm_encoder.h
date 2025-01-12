@@ -5,6 +5,7 @@
 #include "sensor_msgs/msg/temperature.hpp"
 #include "std_msgs/msg/string.hpp"
 #include <iostream>
+#include <fstream>
 #include <streambuf> 
 #include <boost/smart_ptr/shared_ptr.hpp> 
 #include <boost/core/null_deleter.hpp> 
@@ -24,13 +25,13 @@ namespace ArmEncoder{
         public:
             EncoderDiagnosticsBuffer(rclcpp::Publisher<std_msgs::msg::String>::SharedPtr diagnostics_publisher); 
         protected:
-            int override(int c); 
+            int overflow (int c) override; 
         private:  
             void publisher_callback(); 
             rclcpp::Publisher<std_msgs::msg::String>::SharedPtr m_diagnostics_publisher; 
             std::string diagnostics_buffer; 
 
-    };
+    };  
 
     class Ros2ostream: public std::ostream{
         public:
